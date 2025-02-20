@@ -530,15 +530,6 @@ do
             Parent = HueSelectorOuter;
         });
 
-        local HueCursor = Library:Create('Frame', { 
-            BackgroundColor3 = Color3.new(1, 1, 1);
-            AnchorPoint = Vector2.new(0, 0.5);
-            BorderColor3 = Color3.new(0, 0, 0);
-            Size = UDim2.new(1, 0, 0, 1);
-            ZIndex = 18;
-            Parent = HueSelectorInner;
-        });
-
         local HueBoxOuter = Library:Create('Frame', {
             BorderColor3 = Color3.new(0, 0, 0);
             Position = UDim2.fromOffset(4, 228),
@@ -594,8 +585,6 @@ do
             PlaceholderText = 'RGB color',
             TextColor3 = Library.FontColor
         });
-
-        local TransparencyBoxOuter, TransparencyBoxInner, TransparencyCursor;
         
         if Info.Transparency then 
             TransparencyBoxOuter = Library:Create('Frame', {
@@ -622,15 +611,6 @@ do
                 Size = UDim2.new(1, 0, 1, 0);
                 Image = 'http://www.roblox.com/asset/?id=12978095818';
                 ZIndex = 20;
-                Parent = TransparencyBoxInner;
-            });
-
-            TransparencyCursor = Library:Create('Frame', { 
-                BackgroundColor3 = Color3.new(1, 1, 1);
-                AnchorPoint = Vector2.new(0.5, 0);
-                BorderColor3 = Color3.new(0, 0, 0);
-                Size = UDim2.new(0, 1, 1, 0);
-                ZIndex = 21;
                 Parent = TransparencyBoxInner;
             });
         end;
@@ -826,14 +806,6 @@ do
                 BackgroundTransparency = ColorPicker.Transparency;
                 BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
             });
-
-            if TransparencyBoxInner then
-                TransparencyBoxInner.BackgroundColor3 = ColorPicker.Value;
-                TransparencyCursor.Position = UDim2.new(1 - ColorPicker.Transparency, 0, 0, 0);
-            end;
-
-            CursorOuter.Position = UDim2.new(ColorPicker.Sat, 0, 1 - ColorPicker.Vib, 0);
-            HueCursor.Position = UDim2.new(0, 0, ColorPicker.Hue, 0);
 
             HueBox.Text = '#' .. ColorPicker.Value:ToHex()
             RgbBox.Text = table.concat({ math.floor(ColorPicker.Value.R * 255), math.floor(ColorPicker.Value.G * 255), math.floor(ColorPicker.Value.B * 255) }, ', ')
@@ -1743,33 +1715,27 @@ do
         -- https://devforum.roblox.com/t/how-to-make-textboxes-follow-current-cursor-position/1368429/6
         -- thank you nicemike40 :)
 
-        local function Update()
-            local PADDING = 2
-            local reveal = Container.AbsoluteSize.X
+local function Update()
+    local PADDING = 2
+    local reveal = Container.AbsoluteSize.X
 
-            if not Box:IsFocused() or Box.TextBounds.X <= reveal - 2 * PADDING then
-                -- we aren't focused, or we fit so be normal
-                Box.Position = UDim2.new(0, PADDING, 0, 0)
-            else
-                -- we are focused and don't fit, so adjust position
-                local cursor = Box.CursorPosition
-                if cursor ~= -1 then
-                    -- calculate pixel width of text from start to cursor
-                    local subtext = string.sub(Box.Text, 1, cursor-1)
-                    local width = TextService:GetTextSize(subtext, Box.TextSize, Box.Font, Vector2.new(math.huge, math.huge)).X
+    if not Box:IsFocused() or Box.TextBounds.X <= reveal - 2 * PADDING then
+        -- we aren't focused, or we fit so be normal
+        Box.Position = UDim2.new(0, PADDING, 0, 0)
+    else
+        -- we are focused and don't fit, adjust position based on text bounds
+        local subtext = Box.Text
+        local width = TextService:GetTextSize(subtext, Box.TextSize, Box.Font, Vector2.new(math.huge, math.huge)).X
 
-                    -- check if we're inside the box with the cursor
-                    local currentCursorPos = Box.Position.X.Offset + width
-
-                    -- adjust if necessary
-                    if currentCursorPos < PADDING then
-                        Box.Position = UDim2.fromOffset(PADDING-width, 0)
-                    elseif currentCursorPos > reveal - PADDING - 1 then
-                        Box.Position = UDim2.fromOffset(reveal-width-PADDING-1, 0)
-                    end
-                end
-            end
+        -- adjust position to ensure text fits within the box
+        if width > reveal - 2 * PADDING then
+            Box.Position = UDim2.fromOffset(reveal - width - PADDING - 1, 0)
+        else
+            Box.Position = UDim2.new(0, PADDING, 0, 0)
         end
+    end
+end
+
 
         task.spawn(Update)
 
