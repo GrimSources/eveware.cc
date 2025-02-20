@@ -3469,14 +3469,10 @@ if Toggled then
     Outer.Visible = true;
 
     task.spawn(function()
-        local State = InputService.MouseIconEnabled;
 
         while Toggled and ScreenGui.Parent do
-            InputService.MouseIconEnabled = false;
             RenderStepped:Wait();
         end;
-
-        InputService.MouseIconEnabled = State;
     end);
 end;
 
